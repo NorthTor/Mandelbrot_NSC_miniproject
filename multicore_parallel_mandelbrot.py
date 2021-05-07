@@ -113,7 +113,7 @@ if __name__ == '__main__':
     ITERATIONS = 200         # Number of iterations
     THRESHOLD = 2            # Threshol (radius on the unit circle)
     MATRIX_SIZE = 1000       # Square matrix dimension
-    WORKERS = 1             # Number of workers used for pool processing
+    WORKERS = 2             # Number of workers used for pool processing
     
     REAL_MATRIX_MAX = 1
     REAL_MATRIX_MIN = -2
@@ -124,7 +124,7 @@ if __name__ == '__main__':
     complex_matrix = create_complex_matrix(REAL_MATRIX_MIN, REAL_MATRIX_MAX, IMAG_MATRIX_MIN,
                                    IMAG_MATRIX_MAX, MATRIX_SIZE)
     stop = time.time()
-    print('Generated matrix in:', stop-start, 'seconds')
+    print('Generated matrix in:', stop-start, 'second(s)')
     # Turn the generated matrix into 1D for mapping purposes
     complex_array = complex_matrix.flatten()
     
@@ -132,7 +132,7 @@ if __name__ == '__main__':
     map_array = map_array_multicore(complex_array, ITERATIONS, THRESHOLD, WORKERS)
     stop = time.time()
     
-    print('Mapped generated matrix in:', stop-start, 'seconds')
+    print('Mapped generated matrix in:', stop-start, 'second(s)')
     print('Using', WORKERS, 'workers')
     # Turn the generated matrix  back into 2D for plotting purposes
     map_matrix =  np.reshape(map_array, (MATRIX_SIZE, MATRIX_SIZE)) 
