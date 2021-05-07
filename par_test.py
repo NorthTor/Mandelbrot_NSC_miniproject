@@ -17,19 +17,17 @@ def create_complex_matrix(real_min, real_max, imag_min, imag_max, size):
     real_array = np.linspace(real_min, real_max, size, dtype=np.float32)
     imag_array = np.linspace(imag_min, imag_max, size, dtype=np.float32)
     
-    #complex_matrix = np.zeros((size, size), dtype=complex) # pre allocating
-    complex_matrix = np.zeros((size), dtype=complex) # pre allocating 
+    complex_matrix = np.zeros((size, size), dtype=complex) # pre allocating 
 
-    # Set up matrix with complex values  PS-> also possible to do some multicore parallel speedup here:
+    # Set up matrix with complex values
     for column in range(size):
-        #for row in range(size):
-        #complex_matrix[row, column] = complex(real_array[column], imag_array[row])
-        complex_matrix[column] = complex(real_array[column], imag_array[column])
-        
+        for row in range(size):
+            complex_matrix[row, column] = complex(real_array[column], imag_array[row])
+
     return complex_matrix
 
 
-def mandelbrot_computation(complex_entry):
+def mandelbrot_computation(complex_nbr):
    iterations = 200
    threshold = 2
    # takes in an array with numpy complex numbers and does computation 
@@ -37,8 +35,7 @@ def mandelbrot_computation(complex_entry):
    #            1 = stable 
    # lower than 1 = more unstable 
 
-       
-   c = complex_entry # fetch complex number from input data array 
+   c = complex_nbr # fetch complex number from input data array 
    Z = complex(0, 0)  # start value set to zero
        
    # do iterations on the complex value c
@@ -56,6 +53,7 @@ def mandelbrot_computation(complex_entry):
             mapped_entry = 1
    
    return mapped_entry
+
 
 
 def map_complex_matrix(complex_matrix, iterations, threshold, nbr_workers):
@@ -95,8 +93,8 @@ if __name__ == '__main__':
     
     ITERATIONS = 200         # Number of iterations
     THRESHOLD = 2            # Threshol (radius on the unit circle)
-    MATRIX_SIZE = 1000000   # Square matrix dimension
-    WORKERS = 10             # Number of workers used for pool processing
+    MATRIX_SIZE = 1000       # Square matrix dimension
+    WORKERS = 8             # Number of workers used for pool processing
     
     REAL_MATRIX_MAX = 1
     REAL_MATRIX_MIN = -2
@@ -107,17 +105,36 @@ if __name__ == '__main__':
     complex_matrix = create_complex_matrix(REAL_MATRIX_MIN, REAL_MATRIX_MAX, IMAG_MATRIX_MIN,
                                    IMAG_MATRIX_MAX, MATRIX_SIZE)
     stop = time.time()
-   
-    #print(complex_matrix)
-    print(len(complex_matrix))
-    print(stop-start)
+    print('Generated matrix in:', stop-start, 'seconds')
+    # Turn the generated matrix into 1D for mapping purposes
+    complex_array = complex_matrix.flatten()
     
     start = time.time()
-    map_matrix = map_complex_matrix(complex_matrix, ITERATIONS, THRESHOLD, WORKERS)
+    map_array = map_complex_matrix(complex_array, ITERATIONS, THRESHOLD, WORKERS)
     stop = time.time()
+    
+    print('Mapped generated matrix in:', stop-start, 'seconds')
+    print('Using', WORKERS, 'workers')
+    # Turn the generated matrix  back into 2D for plotting purposes
+    map_matrix =  np.reshape(map_array, (MATRIX_SIZE, MATRIX_SIZE)) 
+    
+    
+    # we can PLOT the mandelbrot set
+    xmin, xmax = REAL_MATRIX_MIN, REAL_MATRIX_MAX
+    ymin, ymax = IMAG_MATRIX_MIN, IMAG_MATRIX_MAX
 
-    print(len(map_matrix))
-    print(stop-start)
+    fig, (ax, cax) = plt.subplots(nrows=2, figsize=(7, 7),
+                                  gridspec_kw={"height_ratios": [1, 0.05]})
+    
+    fig.suptitle("Mandelbrot set", fontweight='bold' )
+
+    im = ax.imshow(map_matrix, cmap='hot', extent=[xmin, xmax, ymin, ymax],
+                   interpolation="bicubic")
+
+    plt.colorbar(im, cax=cax, orientation='horizontal')
+    plt.grid()
+    plt.show()
+    
 
 
 
