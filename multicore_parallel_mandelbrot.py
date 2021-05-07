@@ -28,31 +28,31 @@ def create_complex_matrix(real_min, real_max, imag_min, imag_max, size):
 
 
 def mandelbrot_computation(complex_nbr):
-   iterations = 200
-   threshold = 2
-   # takes in an array with numpy complex numbers and does computation 
-   # on all entries mapping them to the mandelbrot "range"
-   #            1 = stable 
-   # lower than 1 = more unstable 
+    iterations = 200
+    threshold = 2
+    # takes in an array with numpy complex numbers and does computation 
+    # on all entries mapping them to the mandelbrot "range"
+    #            1 = stable 
+    # lower than 1 = more unstable 
 
-   c = complex_nbr # fetch complex number from input data array 
-   Z = complex(0, 0)  # start value set to zero
+    c = complex_nbr # fetch complex number from input data array 
+    Z = complex(0, 0)  # start value set to zero
        
-   # do iterations on the complex value c
-   for i in range(iterations):
+    # do iterations on the complex value c
+    for i in range(iterations):
        
-       Z = Z**2 + c  # quadratic complex mapping
+        Z = Z**2 + c  # quadratic complex mapping
 
-       if(abs(Z) > threshold):  # iteration "exploded"
-           # do mapping and stop current iteration
-           mapped_entry = abs(Z)/(iterations)
-           break
+        if(abs(Z) > threshold):  # iteration "exploded"
+            # do mapping and stop current iteration
+            mapped_entry = abs(Z)/(iterations)
+            break
            
             # iterations did not "explode" therefore marked stable with a 1
-       if(i == iterations-2):
-            mapped_entry = 1
+        if(i == iterations-2):
+             mapped_entry = 1
    
-   return mapped_entry
+    return mapped_entry
 
 
 
@@ -86,7 +86,26 @@ def map_array_multicore(array, iterations, threshold, nbr_workers):
         #map_matrix[row,:] = map_array
         
     return map_array
+    
 
+def plot_mandelbrot_set(matrix):
+        # we can PLOT the mandelbrot set
+        xmin, xmax = REAL_MATRIX_MIN, REAL_MATRIX_MAX
+        ymin, ymax = IMAG_MATRIX_MIN, IMAG_MATRIX_MAX
+
+        fig, (ax, cax) = plt.subplots(nrows=2, figsize=(7, 7),
+                                  gridspec_kw={"height_ratios": [1, 0.05]})
+    
+        fig.suptitle("Mandelbrot set", fontweight='bold' )
+
+        im = ax.imshow(matrix, cmap='hot', extent=[xmin, xmax, ymin, ymax],
+                   interpolation="bicubic")
+
+        plt.colorbar(im, cax=cax, orientation='horizontal')
+        plt.grid()
+        plt.show()
+        
+        
                 
 if __name__ == '__main__':
 
@@ -118,26 +137,7 @@ if __name__ == '__main__':
     # Turn the generated matrix  back into 2D for plotting purposes
     map_matrix =  np.reshape(map_array, (MATRIX_SIZE, MATRIX_SIZE)) 
     
-    
-    
-    
-    def 
-    # we can PLOT the mandelbrot set
-    xmin, xmax = REAL_MATRIX_MIN, REAL_MATRIX_MAX
-    ymin, ymax = IMAG_MATRIX_MIN, IMAG_MATRIX_MAX
-
-    fig, (ax, cax) = plt.subplots(nrows=2, figsize=(7, 7),
-                                  gridspec_kw={"height_ratios": [1, 0.05]})
-    
-    fig.suptitle("Mandelbrot set", fontweight='bold' )
-
-    im = ax.imshow(map_matrix, cmap='hot', extent=[xmin, xmax, ymin, ymax],
-                   interpolation="bicubic")
-
-    plt.colorbar(im, cax=cax, orientation='horizontal')
-    plt.grid()
-    plt.show()
-    
+    plot_mandelbrot_set(map_matrix)
 
 
 
