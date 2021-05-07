@@ -3,4 +3,4 @@ Numerical Scientific Computing (NSC) Mini project dureing semester 8 AAU - Digit
 
 Plotting the mandelbrot set using different optimization methods
 
-<img src=""  height="230"/> 
+<img src="https://github.com/TORKGB/NSC_miniproject/blob/main/Mandelbrot.png"  height="230"/> 
