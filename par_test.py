@@ -94,7 +94,7 @@ if __name__ == '__main__':
     ITERATIONS = 200         # Number of iterations
     THRESHOLD = 2            # Threshol (radius on the unit circle)
     MATRIX_SIZE = 1000       # Square matrix dimension
-    WORKERS = 8             # Number of workers used for pool processing
+    WORKERS = 1             # Number of workers used for pool processing
     
     REAL_MATRIX_MAX = 1
     REAL_MATRIX_MIN = -2
@@ -119,6 +119,9 @@ if __name__ == '__main__':
     map_matrix =  np.reshape(map_array, (MATRIX_SIZE, MATRIX_SIZE)) 
     
     
+    
+    
+    def 
     # we can PLOT the mandelbrot set
     xmin, xmax = REAL_MATRIX_MIN, REAL_MATRIX_MAX
     ymin, ymax = IMAG_MATRIX_MIN, IMAG_MATRIX_MAX
