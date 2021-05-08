@@ -29,6 +29,7 @@ def create_complex_matrix(real_min, real_max, imag_min, imag_max, size):
     return complex_matrix
 
 
+
 def mandelbrot_computation(complex_nbr, threshold, iterations):
     
     # takes in an array with numpy complex numbers and does computation 
@@ -66,19 +67,18 @@ def map_array_dask(array, threshold, iterations, nbr_workers):
     Returns an array with linear mapped antries in the range [0, 1] 
     a value of 1 denotes a stable entry while a value below 1 is deemed ustable 
     """
-    #dask.config.set(scheduler='processes')  
-    size = len(array)
-    # we want to minimize communicating results back to the local process. 
-    # It’s often best to leave data on the cluster and operate on it remotely
     
-    cluster = LocalCluster( n_workers=8,
-                            processes=False,
-                            threads_per_worker=2)
+    size = len(array)
+    
+    cluster = LocalCluster( n_workers=nbr_workers,
+                            processes=True, #default = True 
+                            threads_per_worker=1)
     
     client = Client(cluster) 
     
     map_array = client.map(mandelbrot_computation, array, [threshold]*size, [iterations]*size)
-   
+    # we want to minimize communicating results back to the local process. 
+    # It’s often best to leave data on the cluster and operate on it remotely
     wait(map_array) # wait for computation into map_array
     
     array = client.gather(map_array) # gather the results from the clients
