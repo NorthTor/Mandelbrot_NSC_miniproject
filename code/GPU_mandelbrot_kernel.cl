@@ -1,4 +1,4 @@
-// Tor K. Gjerde
+// Author: Tor K. Gjerde
 // Mandelbrot kernel for the GPU_mandelbrot.py script 
 
 // #define PYOPENCL_DEFINE_CDOUBLE  // Uncomment if using double precision on supported device

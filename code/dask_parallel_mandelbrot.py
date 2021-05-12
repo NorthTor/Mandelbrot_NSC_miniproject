@@ -1,6 +1,6 @@
 # Author: Tor Kaufmann Gjerde
-# dask_parallel_mandelbrot.py 
-# A dask implementation for computing and plotting the mandelbrot set 
+# dask_parallel_mandelbrot.py
+# A dask implementation for computing and plotting the mandelbrot set
 
 import time
 import numpy as np
@@ -33,8 +33,8 @@ def create_complex_matrix(real_min, real_max, imag_min, imag_max, size):
 def mandelbrot_computation(complex_nbr, threshold, iterations):
     # Takes in an array with complex numbers and does computation
     # on all entries mapping them to the mandelbrot "range"
-    #            1 = stable 
-    # lower than 1 = more unstable 
+    #            1 = stable
+    # lower than 1 = more unstable
 
     c = complex_nbr  # fetch complex number from input data array
     Z = complex(0, 0)  # start value set to zero
@@ -66,8 +66,9 @@ def map_array_dask(array, threshold, iterations, nbr_workers):
     client = Client(n_workers=nbr_workers)
     start = time.time()
     result = client.map(mandelbrot_computation, array, [threshold]*size, [iterations]*size)
-    # we want to minimize communicating results back to the local process. 
+    # we want to minimize communicating results back to the local process.
     # It’s often best to leave data on the cluster and operate on it remotely
+    wait(result)
     map_array = client.gather(result)  # gather the results from the clients
 
     stop = time.time()
@@ -97,25 +98,23 @@ def plot_mandelbrot(matrix, xmin, xmax, ymin, ymax):
 
 
 def open_dask_status(url_string):
-    # open the dask status 
+    # open the dask status
     webbrowser.open_new(url_string)
 
 
 if __name__ == '__main__':
 
-    ITERATIONS = 5000  # Number of iterations for mandelbrot computation
+    ITERATIONS = 200  # Number of iterations for mandelbrot computation
     THRESHOLD = 2  # Threshold (compute mandelbrot algorithm for values within this
     # radius on the unit circle)
 
-    MATRIX_SIZE = 500  # Square matrix dimension
-    WORKERS = 1  # Number of workers used for processing
+    MATRIX_SIZE = 200  # Square matrix dimension
+    WORKERS = 2  # Number of workers used for processing
 
     REAL_MIN = -2
     REAL_MAX = 1
     IMAG_MIN = -1.5
     IMAG_MAX = 1.5
-
-    file = h5py.File("dask_parallel_mandelbrot.hdf5", "w")
 
     start = time.time()
     complex_matrix = create_complex_matrix(REAL_MIN, REAL_MAX, IMAG_MIN, IMAG_MAX, MATRIX_SIZE)
@@ -135,11 +134,12 @@ if __name__ == '__main__':
 
     flag_save = input("Save output (mapped matrix)? [y]/[n]")
     if flag_save == "y":
+        file = h5py.File("dask_parallel_mandelbrot.hdf5", "w")
         file.create_dataset('dataset', data=map_matrix)
         file.close()
 
     flag_plot = input("Plot mandelbrot set? [y]/[n]")
-    if flag == "y":
+    if flag_plot == "y":
         print("Loading.. please wait")
         plot_mandelbrot(map_matrix, REAL_MIN, REAL_MAX, IMAG_MIN, IMAG_MAX)
     else:
