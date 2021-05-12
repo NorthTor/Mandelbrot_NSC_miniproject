@@ -9,13 +9,19 @@ import time
 import numpy as np
 import matplotlib.pyplot as plt
 
-from dask.distributed import Client, wait, LocalCluster 
+from dask.distributed import Client, wait
+import dask.delayed as delay
+import webbrowser
+
                   
 
 def create_complex_matrix(real_min, real_max, imag_min, imag_max, size):
-    """
-    OUTPUT: matrix containing complex numbers
-    """
+    # Create a square matrix with complex entries for mandelbrot computation 
+   
+    # INPUT: range for imaginar and real axis 
+    # OUTPUT: matrix containing complex numbers
+    
+
     real_array = np.linspace(real_min, real_max, size, dtype=np.float32)
     imag_array = np.linspace(imag_min, imag_max, size, dtype=np.float32)
     
@@ -32,7 +38,7 @@ def create_complex_matrix(real_min, real_max, imag_min, imag_max, size):
 
 def mandelbrot_computation(complex_nbr, threshold, iterations):
     
-    # takes in an array with numpy complex numbers and does computation 
+    # Takes in an array with complex numbers and does computation 
     # on all entries mapping them to the mandelbrot "range"
     #            1 = stable 
     # lower than 1 = more unstable 
@@ -51,7 +57,7 @@ def mandelbrot_computation(complex_nbr, threshold, iterations):
             break
            
             # iterations did not "explode" therefore marked stable with a 1
-        if(i == iterations-2):
+        if(i == iterations-1):
              mapped_entry = 1
    
     return mapped_entry
@@ -67,31 +73,24 @@ def map_array_dask(array, threshold, iterations, nbr_workers):
     Returns an array with linear mapped antries in the range [0, 1] 
     a value of 1 denotes a stable entry while a value below 1 is deemed ustable 
     """
-    
-    size = len(array)
-    
-    cluster = LocalCluster( n_workers=nbr_workers,
-                            processes=True, #default = True 
-                            threads_per_worker=1)
-    
-    client = Client(cluster) 
-    
-    map_array = client.map(mandelbrot_computation, array, [threshold]*size, [iterations]*size)
+    leng = len(array)
+    client = Client(n_workers=nbr_workers) 
+    start = time.time()
+    result = client.map(mandelbrot_computation, array, [threshold]*leng, [iterations]*leng)
     # we want to minimize communicating results back to the local process. 
     # It’s often best to leave data on the cluster and operate on it remotely
-    wait(map_array) # wait for computation into map_array
+        
+    map_array = client.gather(result) # gather the results from the clients
     
-    array = client.gather(map_array) # gather the results from the clients
-    
+    stop = time.time()
     client.close() # close the clients
     
-    return array
+    time_ex = stop - start
+    return map_array, time_ex
     
 
-def plot_mandelbrot_set(matrix):
+def plot_mandelbrot(matrix, xmin, xmax, ymin, ymax):
         # we can PLOT the mandelbrot set
-        xmin, xmax = REAL_MATRIX_MIN, REAL_MATRIX_MAX
-        ymin, ymax = IMAG_MATRIX_MIN, IMAG_MATRIX_MAX
 
         fig, (ax, cax) = plt.subplots(nrows=2, figsize=(7, 7),
                                   gridspec_kw={"height_ratios": [1, 0.05]})
@@ -105,41 +104,50 @@ def plot_mandelbrot_set(matrix):
         plt.grid()
         plt.show()
         
-        
+
+def open_dask_status(url_string):
+    # open the dask status 
+    webbrowser.open_new(url_string)
+    
                 
 if __name__ == '__main__':
 
     
     ITERATIONS = 200         # Number of iterations
     THRESHOLD = 2            # Threshol (radius on the unit circle)
-    MATRIX_SIZE = 200        # Square matrix dimension
-    WORKERS = 2              # Number of workers used for pool processing
+    MATRIX_SIZE = 500        # Square matrix dimension
+    WORKERS = 1             # Number of workers used for pool processing
     
-    REAL_MATRIX_MAX = 1
-    REAL_MATRIX_MIN = -2
-    IMAG_MATRIX_MIN = -1.5
-    IMAG_MATRIX_MAX = 1.5
+    REAL_MIN = -2
+    REAL_MAX = 1
+    IMAG_MIN = -1.5
+    IMAG_MAX = 1.5
     
     start = time.time()
-    complex_matrix = create_complex_matrix(REAL_MATRIX_MIN, REAL_MATRIX_MAX, IMAG_MATRIX_MIN,
-                                   IMAG_MATRIX_MAX, MATRIX_SIZE)
+    complex_matrix = create_complex_matrix(REAL_MIN, REAL_MAX, IMAG_MIN, IMAG_MAX, MATRIX_SIZE)
     stop = time.time()
     print('Generated matrix in:', stop-start, 'second(s)')
     print('Matrix size:', MATRIX_SIZE)
-    # Turn the generated matrix into 1D for mapping purposes
+    
+    # turn the generated matrix into 1D for mapping purposes
     complex_array = complex_matrix.flatten()
     
-    start = time.time()
-    map_array = map_array_dask(complex_array, THRESHOLD, ITERATIONS, WORKERS)
-    stop = time.time()
-    print(np.amin(map_array))
+    map_array, time_execution = map_array_dask(complex_array, THRESHOLD, ITERATIONS, WORKERS)
     
-    print('Mapped generated matrix in:', stop-start, 'second(s)')
-    print('Using', WORKERS, 'workers')
-    # Turn the generated matrix  back into 2D for plotting purposes
+    # turn the generated matrix  back into 2D for plotting purposes
     map_matrix =  np.reshape(map_array, (MATRIX_SIZE, MATRIX_SIZE)) 
+    print('Mapped generated matrix in:', time_execution, 'second(s)')
+    print('Using dask distributed with', WORKERS, 'workers')
     
-    plot_mandelbrot_set(map_matrix)
+
+    flag = input("Plot mandelbrot set? [y]/[n]")
+
+    if flag == "y":
+        print("Loading.. please wait")
+        plot_mandelbrot(map_matrix, REAL_MIN, REAL_MAX, IMAG_MIN, IMAG_MAX  )
+    else:
+        print("Done cu mate!")
+
     
 
 
