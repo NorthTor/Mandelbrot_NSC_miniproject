@@ -1,6 +1,8 @@
-# Author: Tor Kaufmann Gjerde
-# Generating and plotting of the Mandelbrot set
-# A GPU accelerated using PyOpenCl
+""""
+Author: Tor Kaufmann Gjerde
+Generating and plotting of the Mandelbrot set
+A GPU accelerated using PyOpenCl
+"""
 
 import time
 import matplotlib.pyplot as plt
@@ -8,14 +10,36 @@ import numpy as np
 import pyopencl as cl
 import h5py
 
-def create_real_and_imag_matrices(real_min, real_max, imag_min, imag_max, size):
-    # Function that returns two square matrices with dimension "size"
-    # OUTPUT: real_matrix, imag_matrix
 
-    real_array = np.linspace(real_min, real_max, size,
-                             dtype=np.float32)  # set up a vector with linear spacing between min and max values
-    imag_array = np.linspace(imag_max, imag_min, size,
-                             dtype=np.float32)  # set up a vector with linear spacing between min and max values
+def create_real_and_imag_matrices(real_min, real_max, imag_min, imag_max, size):
+    """"
+    Function that takes in a minimum and maximum value for the
+    real and imaginary component of a complex number and returns
+    two matrices one containing the real components and one containing the imaginary.
+    The amount of steps between maximum and minimum values is linear with the size argument.
+    The resulting real matrix obtains the same components in the vertical Y-direction
+    across the whole matrix, and the resulting imaginary matrix obtains the same components
+    in the horizontal X-direction across the whole matrix.
+
+    :param real_min: Minimum value of real component
+    :type real_min: float32
+    :param real_max: Maximum value of real component
+    :type real_max: float32
+    :param imag_min: Minimum value of imaginary component
+    :type imag_min: float32
+    :param imag_max: Maximum value of imaginary component
+    :type imag_max: float 32
+    :param size: Size of the output matrix
+    :type size: float32
+
+    :return real_matrix: matrix with real components
+    :return imag_matrix: Matrix with imaginary components
+    :rtype real_matrix, imag_matrix: Numpy 2D array float32
+    """
+
+    real_array = np.linspace(real_min, real_max, size, dtype=np.float32)
+    imag_array = np.linspace(imag_max, imag_min, size, dtype=np.float32)
+
     real_matrix = np.zeros((size, size), dtype=np.float32)  # pre allocating output vector
     imag_matrix = np.zeros((size, size), dtype=np.float32)  # pre allocating output vector
 
@@ -27,7 +51,20 @@ def create_real_and_imag_matrices(real_min, real_max, imag_min, imag_max, size):
     return real_matrix, imag_matrix
 
 
-def create_map_matrix_GPU(real_matrix, imag_matrix, iterations, threshold):
+def mandelbrot_GPU(real_matrix, imag_matrix, iterations, threshold):
+    """"
+    Function that does GPU accelerated computation of the mandelbrot algorithm
+    found in the separate kernel file
+
+    :param real_matrix: A matrix containing all real components
+    :type real_matrix: Numpy 2D array, float32
+    :param imag_matrix: A matrix containing all imaginary components
+    :type imag_matrix: Numpy 2D array, float32
+
+    :return result_host: Matrix containing mapped values
+    :rtype result_host: Numpy 2D array, float32
+    """
+
     # Create the context (containing platform and device information)
     context = cl.create_some_context()
     # Kernel execution, synchronization, and memory transfer 
@@ -43,8 +80,6 @@ def create_map_matrix_GPU(real_matrix, imag_matrix, iterations, threshold):
     result_host = np.empty((SIZE, SIZE)).astype(np.float32)
 
     # Create a device side read-only memory buffer and copy the data from "hostbuf" into it.
-    # Other possible mem_flags values at:
-    # https://www.khronos.org/registry/OpenCL/sdk/1.2/docs/man/xhtml/clCreateBuffer.html
     mf = cl.mem_flags
     real_matrix_device = cl.Buffer(context, mf.READ_ONLY | mf.COPY_HOST_PTR, hostbuf=real_matrix_host)
     imag_matrix_device = cl.Buffer(context, mf.READ_ONLY | mf.COPY_HOST_PTR, hostbuf=imag_matrix_host)
@@ -67,16 +102,32 @@ def create_map_matrix_GPU(real_matrix, imag_matrix, iterations, threshold):
     return result_host
 
 
-def plot_mandelbrot(matrix, xmin, xmax, ymin, ymax):
-    # PLOT the mandelbrot set from a mapped matrix
-    # using the matplotlib package
+def plot_mandelbrot(matrix, x_min, x_max, y_min, y_max):
+    """
+    PLOT the mandelbrot from a mapped matrix with basis in a coordinate system
+    using the matplotlib package. The maximum/minimum values should agree with
+    maximum/minimum values for the components of the complex numbers used in
+    generating the mapped matrix.
+
+    :param matrix: Mapped matrix to be plotted
+    :type matrix: Numpy 2D array
+    :param x_min: Minimum value for horizontal axis, x-axis
+    :type: x_min: float32
+    :param x_max: Maximum value for horizontal axis, x-axis
+    :type x_max: float32
+    :param y_min: minimum value for vertical axis, y-axis
+    :type y_min: float32
+    :param y_max: Maximum value for vertical axis, y-axis
+    :type y_max: float32
+
+    """
     fig, (ax, cax) = plt.subplots(nrows=2, figsize=(7, 7),
                                   gridspec_kw={"height_ratios": [1, 0.05]})
 
-    fig.suptitle("Mandelbrot set", fontweight='bold')
+    fig.suptitle('Mandelbrot set - GPU accelerated', fontweight='bold')
 
-    im = ax.imshow(matrix, cmap='hot', extent=[xmin, xmax, ymin, ymax],
-                   interpolation="bicubic")
+    im = ax.imshow(matrix, cmap='hot', extent=[x_min, x_max, y_min, y_max],
+                   interpolation='bicubic')
 
     plt.colorbar(im, cax=cax, orientation='horizontal')
     plt.grid()
@@ -85,9 +136,9 @@ def plot_mandelbrot(matrix, xmin, xmax, ymin, ymax):
 
 if __name__ == '__main__':
 
-    SIZE = 1000       # Square matrix dimension
+    SIZE = 1000  # Square matrix size (order)
     ITERATIONS = 200  # Iterations for mandelbrot kernel
-    THRESHOLD = 2     # Threshold used in mandelbrot kernel
+    THRESHOLD = 2  # Threshold used in mandelbrot kernel
 
     REAL_MIN = -2
     REAL_MAX = 1
@@ -100,8 +151,10 @@ if __name__ == '__main__':
                                                              SIZE)
     stop1 = time.time()
     print('Generated Real and Imaginary matrix in:', stop1 - start1, 'second(s)')
+    print('Square matrix size:', SIZE)
+
     start2 = time.time()
-    map_matrix = create_map_matrix_GPU(real_matrix, imag_matrix,
+    map_matrix = mandelbrot_GPU(real_matrix, imag_matrix,
                                        ITERATIONS, THRESHOLD)
     stop2 = time.time()
 
@@ -117,5 +170,5 @@ if __name__ == '__main__':
     if flag_plot == "y":
         print("Loading.. please wait")
         plot_mandelbrot(map_matrix, REAL_MIN, REAL_MAX, IMAG_MIN, IMAG_MAX)
-    else:
-        print("Done cu mate!")
+
+    print("Done cu mate!")

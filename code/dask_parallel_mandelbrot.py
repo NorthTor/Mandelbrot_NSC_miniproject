@@ -68,7 +68,6 @@ def map_array_dask(array, threshold, iterations, nbr_workers):
     result = client.map(mandelbrot_computation, array, [threshold]*size, [iterations]*size)
     # we want to minimize communicating results back to the local process.
     # It’s often best to leave data on the cluster and operate on it remotely
-    wait(result)
     map_array = client.gather(result)  # gather the results from the clients
 
     stop = time.time()
@@ -104,11 +103,11 @@ def open_dask_status(url_string):
 
 if __name__ == '__main__':
 
+    MATRIX_SIZE = 5000  # Square matrix dimension
     ITERATIONS = 200  # Number of iterations for mandelbrot computation
     THRESHOLD = 2  # Threshold (compute mandelbrot algorithm for values within this
     # radius on the unit circle)
 
-    MATRIX_SIZE = 200  # Square matrix dimension
     WORKERS = 2  # Number of workers used for processing
 
     REAL_MIN = -2
