@@ -1,6 +1,7 @@
 # NSC_miniproject
 Numerical Scientific Computing (NSC) 
 Mini Project during spring semester 2021 (semester 8) 
+
 Digital Signal Processing and Computing - Aalborg University Denmark
 
 Computing and plotting the Mandelbrot set using different optimization methods.
