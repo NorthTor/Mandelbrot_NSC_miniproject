@@ -1,0 +1,111 @@
+
+
+TESTING the different mandelbrot implementations: tested on 13th of May 2021
+
+
+If nothin else noted test were conducted on the following platform: 
+Desktop wrkstation
+Memory: 15.6 GiB
+Disc capacity: 360 GB
+Processor: AMD Ryzen 5 2600 six-core processor x 12
+Graphics: AMD Radeon (tm) rx 480 graphics
+OS: Ubuntu 20.04.2 LTS
+OS Type: 64-bit
+
+--------------------------------------------------------------------------------------------------------------------------
+DASK:
+
+    MATRIX_SIZE = 500  # Square matrix dimension
+    ITERATIONS = 200  # Number of iterations for mandelbrot computation
+    THRESHOLD = 2  # Threshold (compute mandelbrot algorithm for values within this
+    # radius on the unit circle)
+
+    WORKERS = 2  # Number of workers used for processing
+    TIME: 248.598 seconds
+
+    WORKERS = 4
+    TIME: 86.196 seconds
+
+
+Other notes: 
+localhost in webbrowser used to monitor process
+
+The downloading and uploading of the complex matrix ie. input data to the function seems to be the bottleneck - as this clearly takes more time than the computation itself when the amount of workers increase above 2. 
+More time should be used on exploring the possibilities of doing more opperations on the cluster aswell as implementing dask arrays. However we dont get away from gathering the complete mapped matrix down to the local process again, as we have the goal to plot the resulting data "locally". 
+
+--------------------------------------------------------------------------------------------------------------------------
+Naive mandelbrot:
+    MATRIX_SIZE = 5000  # Square matrix size
+    ITERATIONS = 200    # Number of iterations for mandelbrot algorithm
+    THRESHOLD = 2       # Threshold for mandelbrot algorithm
+
+    
+    TIME > 30 minutes  computation not finished 
+    for square matrix size = 3000 
+
+    Other notes: 
+    Saving to h5py file does take substantial longer time than with numpy. Probably due to list takes up a lot more space  
+
+------------------------------------------------------------------------------------------------------------------------- 
+ Numpy mandelbrot:
+    MATRIX_SIZE = 3000  # Square matrix dimension
+    ITERATIONS = 200    # Number of iterations for mandelbrot algorithm
+    THRESHOLD = 2       # Threshold for mandelbrot algorithm
+
+    TIME = 266.112 Seconds (for a 3000x3000 dimension matrix)
+    TIME > 25 minutes for matrix dimension 5000
+    
+    Other notes:
+    The numpy version implemented the making of a matrix with complex entries slightly different than the naive_mandelbrot.py version. This lead to a steep increase in computation time compared to the "naive" version. computation time for this test is for a matrix dimension of 3000x3000. This also shows that indexing numpy arrays can be slow and that Numpy should be optimized for operating on whole vectors.  
+
+
+--------------------------------------------------------------------------------------------------------------------------
+Python Multicore Parallel Mandelbrot:
+
+    MATRIX_SIZE = 5000  # Square matrix dimension
+    ITERATIONS = 200    # Number of iterations for mandelbrot algorithm
+    THRESHOLD = 2       # Threshold for mandelbrot algorithm
+
+    WORKERS = 1
+    TIME = 1257.044 seconds  (21 minutes)
+
+    WORKERS = 2
+    TIME = 508.170 seconds   (8 minutes 28 seconds) 
+
+    WORKERS = 4
+    TIME = 263.454 seconds   (4 minutes 23 seconds)
+
+    WORKERS = 6
+    TIME = 187.518 seconds   (3 minutes 8 seconds)
+
+    WORKERS = 8
+    TIME = 165.476 seconds   (2 minutes 45 seconds)
+
+    WORKERS = 10
+    TIME = 154.302 seconds   (2 minutes 34 seconds)
+
+    WORKERS = 12
+    TIME =  147.404 seconds  (2 minutes 27 seconds)
+
+
+-------------------------------------------------------------------------------------------------------------------------
+Cython version:
+
+    MATRIX_SIZE = 5000  # Square matrix dimension
+    ITERATIONS = 200    # Number of iterations for mandelbrot algorithm
+    THRESHOLD = 2  
+
+    TIME to compute: 128.702 seconds (2 minutes 9 seconds)
+
+-------------------------------------------------------------------------------------------------------------------------
+ GPU with PyOpenCl 
+
+ Tested on platform: Intel(R) Iris(TM) Graphics 6100' on 'Apple' Macbook Pro Retina A2015
+
+    MATRIX_SIZE = 5000  # Square matrix dimension
+    ITERATIONS = 200    # Number of iterations for mandelbrot algorithm
+    THRESHOLD = 2 
+
+    Time to compute: 2.494368076324463 second(s) dimension = 5000
+    Time to compute: 4.288148880004883 second(s) dimension = 10000
+-------------------------------------------------------------------------------------------------------------------------

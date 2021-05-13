@@ -1,7 +1,12 @@
 # NSC_miniproject
-Numerical Scientific Computing (NSC) Mini project 
-during semester 8 AAU - Digital Signal Processing and Computing 
+Numerical Scientific Computing (NSC) 
+Mini Project during spring semester 2021 (semester 8) - Digital Signal Processing and Computing - AAU
 
-Plotting the mandelbrot set using different optimization methods
+Computing and plotting the Mandelbrot set using different optimization methods.
+
+All implemented versions are found in the folder "code".
+
+Read the pdf document for more details: Mini_Project_Mandelbrot_TorKG.pdf
+
 
 <img src="https://github.com/TORKGB/NSC_miniproject/blob/main/Mandelbrot.png"  height="450"/> 
