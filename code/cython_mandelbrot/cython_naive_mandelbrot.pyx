@@ -8,7 +8,7 @@ on readability and ability to validate the implementation.
 
 UPDATE: This is the Cython version where type definition is used to speed up computations.
         should be built with the separate script:      setup_cython_naive_mandelbrot.py
-        This is done from terminal with the command:   python 3 setup_cython_naive_mandelbrot.py build_ext --inplace
+        This is done from terminal with the command:   python3 setup_cython_naive_mandelbrot.py build_ext --inplace
         
         An already compiled and built version of this code is found in the same folder as: 
         cython_naive_mandelbrot.c

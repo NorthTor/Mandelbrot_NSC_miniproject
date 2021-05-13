@@ -157,7 +157,7 @@ def plot_mandelbrot(matrix, x_min, x_max, y_min, y_max):
 
 if __name__ == '__main__':
 
-    MATRIX_SIZE = 1000  # Square matrix size (order)
+    MATRIX_SIZE = 5000  # Square matrix size (order)
     ITERATIONS = 200  # Number of iterations for mandelbrot algorithm
     THRESHOLD = 2  # Threshold for mandelbrot algorithm
 
