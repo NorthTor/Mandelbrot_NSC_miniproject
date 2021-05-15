@@ -30,9 +30,11 @@ DASK:
 Other notes: 
 localhost in webbrowser used to monitor process
 
-The downloading and uploading of the complex matrix ie. input data to the function seems to be the bottleneck - as this clearly takes more time than the computation itself when the amount of workers increase above 2. 
-More time should be used on exploring the possibilities of doing more opperations on the cluster aswell as implementing dask arrays. However we dont get away from gathering the complete mapped matrix down to the local process again, as we have the goal to plot the resulting data "locally". 
-
+The downloading and uploading of the complex matrix ie. input data to the function seems to be the bottleneck - 
+as this clearly takes more time than the computation itself when the amount of workers increase above 2. 
+More time should be used on exploring the possibilities of doing more opperations on the cluster as well as 
+implementing dask arrays. However we dont get away from gathering the complete mapped matrix down to the 
+local process again, as we have the goal to plot the resulting data "locally". 
 --------------------------------------------------------------------------------------------------------------------------
 Naive mandelbrot:
     MATRIX_SIZE = 5000  # Square matrix size
@@ -56,9 +58,10 @@ Naive mandelbrot:
     TIME > 25 minutes for matrix dimension 5000
     
     Other notes:
-    The numpy version implemented the making of a matrix with complex entries slightly different than the naive_mandelbrot.py version. This lead to a steep increase in computation time compared to the "naive" version. computation time for this test is for a matrix dimension of 3000x3000. This also shows that indexing numpy arrays can be slow and that Numpy should be optimized for operating on whole vectors.  
-
-
+    The numpy version implemented the making of a matrix with complex entries slightly different than the 
+    naive_mandelbrot.py version. This lead to a steep increase in computation time compared to the "naive" version. 
+    computation time for this test is for a matrix dimension of 3000x3000. This also shows that indexing numpy arrays 
+    can be slow and that Numpy should be optimized for operating on whole vectors.  
 --------------------------------------------------------------------------------------------------------------------------
 Python Multicore Parallel Mandelbrot:
 
